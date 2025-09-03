@@ -1,50 +1,93 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Stethoscope, Mail, Lock } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Stethoscope, Mail, Lock } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     // Simulate authentication
     if (email && password) {
       // Mock role assignment based on email domain for demo
-      let role = "doctor"
-      if (email.includes("nurse")) role = "nurse"
-      if (email.includes("pharmacy")) role = "pharmacist"
+      let role = "doctor";
+      if (email.includes("nurse")) role = "nurse";
+      if (email.includes("pharmacy")) role = "pharmacist";
 
       // Store user data in localStorage for demo
-      localStorage.setItem("user", JSON.stringify({ email, role }))
 
-      // Redirect to role-specific dashboard
-      router.push(`/dashboard/${role}`)
-    } else {
-      setError("Please enter both email and password")
+      try {
+        const response = await fetch("api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Login failed");
+        }
+
+        // Save JWT to localStorage (or cookies if you prefer)
+        console.log(data);
+        // Store user data for demo
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: data.user.email,
+            role: data.user.role,
+            fullName: data.user.fullName,
+          })
+        );
+        setIsLoading(false);
+        toast(data.message || "Successfully logged in");
+        // Redirect to dashboard
+        router.push(`/dashboard/${data.user.role}`);
+      } catch (err) {
+        setIsLoading(false);
+        if (err instanceof Error) {
+          toast(err.message);
+          console.error("Login error:", err.message);
+        } else {
+          toast('An error occurred');
+          console.error("Login error:", err);
+        }
+        return null;
+      }
+      setIsLoading(false);
     }
-
-    setIsLoading(false)
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+       <Toaster position='top-center'/>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -53,7 +96,9 @@ export default function LoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">PediDose System</CardTitle>
-          <CardDescription>Sign in to access the pediatric dosage calculation system</CardDescription>
+          <CardDescription>
+            Sign in to access the pediatric dosage calculation system
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -111,12 +156,13 @@ export default function LoginPage() {
 
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <p className="text-xs text-muted-foreground text-center">
-              Demo accounts: Use any email with 'nurse' for Nurse role, 'pharmacy' for Pharmacist role, or any other
-              email for Doctor role.
+              Demo accounts: Use any email with 'nurse' for Nurse role,
+              'pharmacy' for Pharmacist role, or any other email for Doctor
+              role.
             </p>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

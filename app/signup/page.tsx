@@ -1,17 +1,30 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Stethoscope, User, Mail, Lock, UserCheck } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Stethoscope, User, Mail, Lock, UserCheck } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "sonner";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -20,58 +33,97 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
     role: "",
-  })
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     // Validation
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
-      setError("Please fill in all fields")
-      setIsLoading(false)
-      return
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.role
+    ) {
+      setError("Please fill in all fields");
+      setIsLoading(false);
+      return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters")
-      setIsLoading(false)
-      return
+      setError("Password must be at least 6 characters");
+      setIsLoading(false);
+      return;
     }
 
     // Simulate account creation
-    setTimeout(() => {
-      // Store user data for demo
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: formData.email,
-          role: formData.role,
+    setTimeout(() => {}, 1000);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
         }),
-      )
+      });
 
-      // Redirect to login
-      router.push("/login?message=Account created successfully")
-    }, 1000)
-  }
+      console.log(res);
+
+      const result = await res.json();
+  console.log(result);
+ setIsLoading(false);
+       if (!!result.user) {
+        // Store user data for demo
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: result.user.email,
+            role: result.user.role,
+            fullName: result.user.fullName,
+          })
+        );
+       
+        toast("Successfully Logged in!");
+        // Redirect to dashboard
+        router.push(`/dashboard/${result.user.role}`);
+        return;
+      }
+    if(result.error)toast(result.error)
+     
+    } catch (err) {
+      if (err instanceof Error) {
+        toast(err.message);
+        console.error("Login error:", err.message);
+      } else {
+        toast("An error occurred");
+        console.error("Login error:", err);
+      }
+      return null;
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Toaster position="top-center" />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -80,7 +132,9 @@ export default function SignupPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <CardDescription>Join the PediDose system for safe pediatric dosage calculations</CardDescription>
+          <CardDescription>
+            Join the PediDose system for safe pediatric dosage calculations
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +153,9 @@ export default function SignupPage() {
                   type="text"
                   placeholder="Enter your full name"
                   value={formData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("fullName", e.target.value)
+                  }
                   className="pl-10"
                   required
                 />
@@ -126,7 +182,10 @@ export default function SignupPage() {
               <Label htmlFor="role">Select Role</Label>
               <div className="relative">
                 <UserCheck className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                <Select value={formData.role} onValueChange={(value) => handleInputChange("role", value)}>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => handleInputChange("role", value)}
+                >
                   <SelectTrigger className="pl-10">
                     <SelectValue placeholder="Choose your role" />
                   </SelectTrigger>
@@ -148,7 +207,9 @@ export default function SignupPage() {
                   type="password"
                   placeholder="Enter your password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   className="pl-10"
                   required
                 />
@@ -164,7 +225,9 @@ export default function SignupPage() {
                   type="password"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
                   className="pl-10"
                   required
                 />
@@ -187,5 +250,5 @@ export default function SignupPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
