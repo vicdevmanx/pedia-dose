@@ -72,7 +72,8 @@ export default function PatientsPage() {
       })
       if (res.ok) {
         const created = await res.json()
-        setPatients((prev) => [...prev, created])
+        // Prepend new patient for instant feedback and animation
+        setPatients((prev) => [created, ...prev])
         setShowAddModal(false)
       }
     } finally {
