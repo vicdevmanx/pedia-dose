@@ -122,7 +122,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-2">
       <Toaster position="top-center" />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -245,6 +245,12 @@ export default function SignupPage() {
               <Link href="/login" className="text-primary hover:underline">
                 Sign in
               </Link>
+            </p>
+          </div>
+
+           <div className="mt-4 p-3 bg-muted rounded-lg">
+            <p className="text-xs text-muted-foreground text-center">
+              This software is still under construction and is currently out for testing purposes only.
             </p>
           </div>
         </CardContent>

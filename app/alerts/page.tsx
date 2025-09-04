@@ -97,11 +97,9 @@ export default function AlertsPage() {
 
     loadAlerts()
 
-    // Simulate real-time updates
     const interval = setInterval(() => {
       setAlerts((prev) => {
         const updated = [...prev]
-        // Simulate new alerts occasionally
         if (Math.random() > 0.8) {
           const newAlert: Alert = {
             id: Date.now().toString(),
@@ -117,7 +115,7 @@ export default function AlertsPage() {
         }
         return updated
       })
-    }, 30000) // Update every 30 seconds
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [])
@@ -144,11 +142,11 @@ export default function AlertsPage() {
   const getAlertIcon = (type: Alert["type"]) => {
     switch (type) {
       case "safe":
-        return <CheckCircle className="h-5 w-5 text-green-600" />
+        return <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
       case "caution":
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />
+        return <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
       case "danger":
-        return <XCircle className="h-5 w-5 text-red-600" />
+        return <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
     }
   }
 
@@ -166,15 +164,15 @@ export default function AlertsPage() {
   const getCategoryIcon = (category: Alert["category"]) => {
     switch (category) {
       case "dosage":
-        return <Pill className="h-4 w-4" />
+        return <Pill className="h-4 w-4 flex-shrink-0" />
       case "allergy":
-        return <AlertTriangle className="h-4 w-4" />
+        return <AlertTriangle className="h-4 w-4 flex-shrink-0" />
       case "interaction":
-        return <XCircle className="h-4 w-4" />
+        return <XCircle className="h-4 w-4 flex-shrink-0" />
       case "system":
-        return <Clock className="h-4 w-4" />
+        return <Clock className="h-4 w-4 flex-shrink-0" />
       default:
-        return <AlertTriangle className="h-4 w-4" />
+        return <AlertTriangle className="h-4 w-4 flex-shrink-0" />
     }
   }
 
@@ -185,10 +183,10 @@ export default function AlertsPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading safety alerts...</p>
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-sm sm:text-base text-muted-foreground">Loading safety alerts...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -197,16 +195,22 @@ export default function AlertsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col items-start gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Safety Alerts</h1>
-            <p className="text-muted-foreground">Monitor critical safety notifications and drug alerts</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Safety Alerts</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Monitor critical safety notifications and drug alerts</p>
           </div>
           <div className="flex gap-2">
-            <Badge variant={unreadCount > 0 ? "destructive" : "secondary"}>{unreadCount} Unread</Badge>
-            {highPriorityCount > 0 && <Badge variant="destructive">{highPriorityCount} High Priority</Badge>}
+            <Badge variant={unreadCount > 0 ? "destructive" : "secondary"} className="text-xs sm:text-sm">
+              {unreadCount} Unread
+            </Badge>
+            {highPriorityCount > 0 && (
+              <Badge variant="destructive" className="text-xs sm:text-sm">
+                {highPriorityCount} High Priority
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -220,20 +224,26 @@ export default function AlertsPage() {
 
         {/* Filter Tabs */}
         <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">All Alerts ({alerts.length})</TabsTrigger>
-            <TabsTrigger value="unread">Unread ({unreadCount})</TabsTrigger>
-            <TabsTrigger value="high">High Priority ({alerts.filter((a) => a.priority === "high").length})</TabsTrigger>
+          <TabsList className="flex overflow-x-auto whitespace-nowrap">
+            <TabsTrigger value="all" className="flex-1 min-w-[100px] text-xs sm:text-sm">
+              All Alerts ({alerts.length})
+            </TabsTrigger>
+            <TabsTrigger value="unread" className="flex-1 min-w-[100px] text-xs sm:text-sm">
+              Unread ({unreadCount})
+            </TabsTrigger>
+            <TabsTrigger value="high" className="flex-1 min-w-[100px] text-xs sm:text-sm">
+              High Priority ({alerts.filter((a) => a.priority === "high").length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={filter} className="space-y-4">
             {filteredAlerts.length === 0 ? (
               <Card>
-                <CardContent className="flex items-center justify-center py-12">
+                <CardContent className="flex items-center justify-center py-8 sm:py-12">
                   <div className="text-center">
-                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No Alerts</h3>
-                    <p className="text-muted-foreground">
+                    <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">No Alerts</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
                       {filter === "all"
                         ? "No safety alerts at this time."
                         : filter === "unread"
@@ -247,14 +257,14 @@ export default function AlertsPage() {
               <div className="space-y-4">
                 {filteredAlerts.map((alert) => (
                   <Card key={alert.id} className={`${!alert.read ? "border-l-4 border-l-primary" : ""}`}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+                        <div className="flex items-start gap-2 sm:gap-3">
                           {getAlertIcon(alert.type)}
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <CardTitle className="text-base">{alert.title}</CardTitle>
-                              <Badge className={getAlertBadgeColor(alert.type)}>
+                          <div className="space-y-1 sm:space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CardTitle className="text-sm sm:text-base">{alert.title}</CardTitle>
+                              <Badge className={`${getAlertBadgeColor(alert.type)} text-xs sm:text-sm`}>
                                 {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)}
                               </Badge>
                               {!alert.read && (
@@ -263,7 +273,7 @@ export default function AlertsPage() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 {getCategoryIcon(alert.category)}
                                 {alert.category.charAt(0).toUpperCase() + alert.category.slice(1)}
@@ -281,20 +291,30 @@ export default function AlertsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {!alert.read && (
-                            <Button variant="outline" size="sm" onClick={() => markAsRead(alert.id)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => markAsRead(alert.id)}
+                              className="min-w-[80px] h-8 text-xs sm:text-sm"
+                            >
                               Mark Read
                             </Button>
                           )}
-                          <Button variant="ghost" size="sm" onClick={() => clearAlert(alert.id)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => clearAlert(alert.id)}
+                            className="min-w-[80px] h-8 text-xs sm:text-sm"
+                          >
                             Dismiss
                           </Button>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm">{alert.message}</p>
+                      <p className="text-xs sm:text-sm">{alert.message}</p>
                     </CardContent>
                   </Card>
                 ))}
