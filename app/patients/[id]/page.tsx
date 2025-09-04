@@ -33,7 +33,11 @@ interface Patient {
   dateOfBirth: string
   guardianName: string
   guardianPhone: string
-  emergencyContact: string
+  emergencyContact: {
+    name: string
+    relationship: string
+    phone: string
+  }
   allergies: string[]
   conditions: string[]
   notes: string
@@ -44,251 +48,74 @@ interface Patient {
   medicalRecordNumber?: string
 }
 
-const patientDatabase: { [key: string]: Patient } = {
-  "1": {
-    id: 1,
-    name: "Emma Johnson",
-    age: 8,
-    weight: 25.5,
-    height: 125,
-    gender: "Female",
-    dateOfBirth: "2016-03-15",
-    guardianName: "Jennifer Johnson",
-    guardianPhone: "(555) 123-4567",
-    emergencyContact: "Robert Johnson - (555) 987-6543",
-    allergies: ["Penicillin", "Peanuts"],
-    conditions: ["Asthma"],
-    notes: "Patient responds well to albuterol. Monitor for seasonal allergy flare-ups.",
-    status: "active",
-    lastVisit: "2024-01-15",
-    createdDate: "2023-06-10",
-    address: "123 Main St, Springfield, IL 62701",
-    medicalRecordNumber: "MRN-001234",
-  },
-  "2": {
-    id: 2,
-    name: "Michael Chen",
-    age: 12,
-    weight: 40.2,
-    height: 145,
-    gender: "Male",
-    dateOfBirth: "2012-08-22",
-    guardianName: "Lisa Chen",
-    guardianPhone: "(555) 234-5678",
-    emergencyContact: "David Chen - (555) 876-5432",
-    allergies: ["Shellfish"],
-    conditions: ["Type 1 Diabetes"],
-    notes: "Requires insulin monitoring. Check blood glucose before meals.",
-    status: "active",
-    lastVisit: "2024-01-20",
-    createdDate: "2023-05-15",
-    address: "456 Oak Ave, Springfield, IL 62702",
-    medicalRecordNumber: "MRN-005678",
-  },
-  "3": {
-    id: 3,
-    name: "Sofia Rodriguez",
-    age: 5,
-    weight: 18.3,
-    height: 110,
-    gender: "Female",
-    dateOfBirth: "2019-11-08",
-    guardianName: "Maria Rodriguez",
-    guardianPhone: "(555) 345-6789",
-    emergencyContact: "Carlos Rodriguez - (555) 765-4321",
-    allergies: ["Latex"],
-    conditions: ["Eczema"],
-    notes: "Sensitive skin, use hypoallergenic products only.",
-    status: "active",
-    lastVisit: "2024-01-18",
-    createdDate: "2023-07-22",
-    address: "789 Pine St, Springfield, IL 62703",
-    medicalRecordNumber: "MRN-009012",
-  },
-  "4": {
-    id: 4,
-    name: "James Wilson",
-    age: 15,
-    weight: 58.7,
-    height: 168,
-    gender: "Male",
-    dateOfBirth: "2009-04-12",
-    guardianName: "Sarah Wilson",
-    guardianPhone: "(555) 456-7890",
-    emergencyContact: "Mark Wilson - (555) 654-3210",
-    allergies: [],
-    conditions: ["ADHD"],
-    notes: "Takes medication for ADHD, monitor for side effects.",
-    status: "active",
-    lastVisit: "2024-01-22",
-    createdDate: "2023-04-15",
-    address: "321 Elm Dr, Springfield, IL 62704",
-    medicalRecordNumber: "MRN-003456",
-  },
-}
-
-const getMedicationHistory = (patientId: string) => {
-  const medicationData: { [key: string]: any[] } = {
-    "1": [
-      {
-        id: 1,
-        medication: "Albuterol Inhaler",
-        dosage: "90 mcg, 2 puffs",
-        frequency: "As needed",
-        prescribedBy: "Dr. Smith",
-        dateStarted: "2024-01-10",
-        status: "Active",
-      },
-      {
-        id: 2,
-        medication: "Acetaminophen",
-        dosage: "160 mg",
-        frequency: "Every 6 hours as needed",
-        prescribedBy: "Dr. Smith",
-        dateStarted: "2024-01-15",
-        status: "Completed",
-      },
-    ],
-    "2": [
-      {
-        id: 1,
-        medication: "Insulin Glargine",
-        dosage: "10 units",
-        frequency: "Once daily at bedtime",
-        prescribedBy: "Dr. Johnson",
-        dateStarted: "2023-08-15",
-        status: "Active",
-      },
-      {
-        id: 2,
-        medication: "Insulin Lispro",
-        dosage: "Variable based on carbs",
-        frequency: "Before meals",
-        prescribedBy: "Dr. Johnson",
-        dateStarted: "2023-08-15",
-        status: "Active",
-      },
-    ],
-    "3": [
-      {
-        id: 1,
-        medication: "Hydrocortisone Cream",
-        dosage: "1% topical",
-        frequency: "Twice daily as needed",
-        prescribedBy: "Dr. Brown",
-        dateStarted: "2024-01-05",
-        status: "Active",
-      },
-    ],
-    "4": [
-      {
-        id: 1,
-        medication: "Methylphenidate",
-        dosage: "18 mg",
-        frequency: "Once daily in morning",
-        prescribedBy: "Dr. Davis",
-        dateStarted: "2023-09-01",
-        status: "Active",
-      },
-    ],
-  }
-  return medicationData[patientId] || []
-}
-
-const getVisitHistory = (patientId: string) => {
-  const visitData: { [key: string]: any[] } = {
-    "1": [
-      {
-        id: 1,
-        date: "2024-01-15",
-        type: "Follow-up",
-        provider: "Dr. Smith",
-        reason: "Asthma check-up",
-        notes: "Breathing improved, continue current treatment",
-      },
-      {
-        id: 2,
-        date: "2023-12-20",
-        type: "Sick Visit",
-        provider: "Dr. Johnson",
-        reason: "Upper respiratory infection",
-        notes: "Prescribed antibiotics, follow up in 1 week",
-      },
-    ],
-    "2": [
-      {
-        id: 1,
-        date: "2024-01-20",
-        type: "Diabetes Management",
-        provider: "Dr. Johnson",
-        reason: "Routine diabetes check",
-        notes: "Blood sugar levels stable, continue current regimen",
-      },
-      {
-        id: 2,
-        date: "2023-11-15",
-        type: "Follow-up",
-        provider: "Dr. Johnson",
-        reason: "Insulin adjustment",
-        notes: "Adjusted evening insulin dose",
-      },
-    ],
-    "3": [
-      {
-        id: 1,
-        date: "2024-01-18",
-        type: "Dermatology",
-        provider: "Dr. Brown",
-        reason: "Eczema flare-up",
-        notes: "Prescribed topical steroid, avoid known triggers",
-      },
-    ],
-    "4": [
-      {
-        id: 1,
-        date: "2024-01-22",
-        type: "Psychiatry",
-        provider: "Dr. Davis",
-        reason: "ADHD medication review",
-        notes: "Patient doing well on current dose, continue treatment",
-      },
-    ],
-  }
-  return visitData[patientId] || []
-}
 
 export default function PatientDetailPage() {
-  const params = useParams()
-  const patientId = params.id as string
-  const [patient, setPatient] = useState<Patient | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [showEditModal, setShowEditModal] = useState(false)
+  const params = useParams();
+  const patientId = params.id as string;
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [medicationHistory, setMedicationHistory] = useState<any[]>([]);
+  const [visitHistory, setVisitHistory] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadPatient = () => {
-      setLoading(true)
-      // Simulate API call delay
-      setTimeout(() => {
-        const foundPatient = patientDatabase[patientId]
-        setPatient(foundPatient || null)
-        setLoading(false)
-      }, 500)
-    }
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch patient details
+        const patientRes = await fetch(`/api/patients/${patientId}`);
+        let patientData;
+        try {
+          patientData = await patientRes.json();
+        } catch (jsonErr) {
+          setError('API returned invalid JSON. Check if the route exists and returns JSON.');
+          setPatient(null);
+          return;
+        }
+        if (!patientRes.ok) {
+          setError(patientData.error || 'Unknown error fetching patient');
+          setPatient(null);
+        } else {
+          setPatient(patientData || null);
+        }
 
-    if (patientId) {
-      loadPatient()
-    }
-  }, [patientId])
+        // Fetch medication history
+        const medRes = await fetch(`/api/patients/${patientId}/medications`);
+        let medData = [];
+        try {
+          medData = await medRes.json();
+        } catch {
+          medData = [];
+        }
+        setMedicationHistory(Array.isArray(medData) ? medData : []);
+
+        // Fetch visit history
+        const visitRes = await fetch(`/api/patients/${patientId}/visits`);
+        let visitData = [];
+        try {
+          visitData = await visitRes.json();
+        } catch {
+          visitData = [];
+        }
+        setVisitHistory(Array.isArray(visitData) ? visitData : []);
+      } catch (e: any) {
+        setError(e?.message || 'Unknown error occurred');
+        setPatient(null);
+        setMedicationHistory([]);
+        setVisitHistory([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (patientId) fetchData();
+  }, [patientId]);
 
   const handlePatientUpdate = (updatedPatient: any) => {
-    // Update local database for demo
-    if (patientId) {
-      const updated = { ...updatedPatient, id: Number(patientId) }
-      patientDatabase[patientId] = updated
-      setPatient(updated)
-    }
-    setShowEditModal(false)
-  }
+    setPatient(updatedPatient);
+    setShowEditModal(false);
+  };
 
   if (loading) {
     return (
@@ -316,17 +143,18 @@ export default function PatientDetailPage() {
             </Link>
           </div>
           <MedicalAlert type="danger" title="Patient Not Found">
-            The patient with ID {patientId} could not be found in the system.
+            The patient with ID {patientId} could not be found in the system.<br />
+            {error && (
+              <span className="block mt-2 text-red-500">Error: {error}</span>
+            )}
           </MedicalAlert>
         </div>
       </DashboardLayout>
-    )
+    );
   }
 
-  const hasAllergies = patient.allergies.length > 0
-  const hasConditions = patient.conditions.length > 0
-  const medicationHistory = getMedicationHistory(patientId)
-  const visitHistory = getVisitHistory(patientId)
+  const hasAllergies = patient && patient.allergies && patient.allergies.length > 0;
+  const hasConditions = patient && patient.conditions && patient.conditions.length > 0;
 
   const calculateBMI = () => {
     if (patient.height && patient.weight) {
@@ -426,7 +254,7 @@ export default function PatientDetailPage() {
                     : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
                 }
               >
-                {patient.status.charAt(0).toUpperCase() + patient.status.slice(1)}
+                {patient.status ? (patient.status.charAt(0).toUpperCase() + patient.status.slice(1)) : "Unknown"}
               </Badge>
             </CardContent>
           </Card>
@@ -499,15 +327,15 @@ export default function PatientDetailPage() {
                 <CardContent className="space-y-3">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Guardian/Parent</p>
-                    <p className="font-semibold">{patient.guardianName}</p>
+                    <p className="font-semibold">{patient.emergencyContact?.name || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Guardian Phone</p>
-                    <p className="font-semibold">{patient.guardianPhone}</p>
+                    <p className="font-semibold">{patient.emergencyContact?.phone || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Emergency Contact</p>
-                    <p className="font-semibold">{patient.emergencyContact}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Relationship</p>
+                    <p className="font-semibold">{patient.emergencyContact?.relationship || "N/A"}</p>
                   </div>
                 </CardContent>
               </Card>

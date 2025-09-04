@@ -56,6 +56,7 @@ export function PatientModal({ isOpen, onClose, onSave, patient, mode }: Patient
   const [newAllergy, setNewAllergy] = useState("")
   const [newCondition, setNewCondition] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (patient && mode === "edit") {
@@ -89,20 +90,41 @@ export function PatientModal({ isOpen, onClose, onSave, patient, mode }: Patient
 
   const handleSave = async () => {
     setIsLoading(true)
+    setError(null)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const patientData = {
+      const apiUrl = "/api/patients";
+      let res, savedPatient;
+      // Only send fields the API expects
+      const payload = {
         ...formData,
-        id: mode === "edit" ? patient?.id : Date.now(),
+        emergencyContact: formData.emergencyContact,
+        id: mode === "edit" ? patient?.id : undefined,
       }
-
-      onSave(patientData)
-      onClose()
-    } catch (error) {
-      console.error("Error saving patient:", error)
+      if (mode === "add") {
+        res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch(apiUrl, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      const result = await res.json();
+      if (!res.ok || result.error) {
+        setError(result.error || "Failed to save patient");
+        return;
+      }
+      onSave(result);
+      onClose();
+    } catch (error: any) {
+      setError(error.message || "Failed to save patient");
+      console.error("Error saving patient:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -343,6 +365,9 @@ export function PatientModal({ isOpen, onClose, onSave, patient, mode }: Patient
           </div>
         </div>
 
+        {error && (
+          <div className="text-red-600 text-sm pb-2">{error}</div>
+        )}
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel

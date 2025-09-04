@@ -159,10 +159,10 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose} >
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl" >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex gap-2">
             <Pill className="h-5 w-5" />
             {mode === "add" ? "Add New Drug" : "Edit Drug"}
           </DialogTitle>
