@@ -55,7 +55,7 @@ export default function NurseDashboard() {
     },
   ]
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor =(status: string) => {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
@@ -83,22 +83,24 @@ export default function NurseDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nurse Dashboard</h1>
-          <p className="text-muted-foreground">Manage medication schedules and track patient administrations.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Nurse Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage medication schedules and track patient administrations.
+          </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Scheduled Today</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.scheduledMedications}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.scheduledMedications}</div>
               <p className="text-xs text-muted-foreground">Medications for today</p>
             </CardContent>
           </Card>
@@ -109,18 +111,20 @@ export default function NurseDashboard() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.completedToday}</div>
+              <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.completedToday}</div>
               <p className="text-xs text-muted-foreground">Administered successfully</p>
             </CardContent>
           </Card>
 
           <Card>
+
+
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pendingAdministrations}</div>
+              <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.pendingAdministrations}</div>
               <p className="text-xs text-muted-foreground">Awaiting administration</p>
             </CardContent>
           </Card>
@@ -131,24 +135,26 @@ export default function NurseDashboard() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.adverseEvents}</div>
+              <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.adverseEvents}</div>
               <p className="text-xs text-muted-foreground">Reported this week</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Link href="/medication-schedule">
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950 dark:text-blue-400">
-                    <Calendar className="h-6 w-6" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950 dark:text-blue-400">
+                    <Calendar className="h-5 sm:h-6 w-5 sm:w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Medication Schedule</h3>
-                    <p className="text-sm text-muted-foreground">View and manage patient medication schedules</p>
+                    <h3 className="font-semibold text-sm sm:text-base">Medication Schedule</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      View and manage patient medication schedules
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -157,14 +163,16 @@ export default function NurseDashboard() {
 
           <Link href="/administration">
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-50 text-green-600 rounded-lg dark:bg-green-950 dark:text-green-400">
-                    <ClipboardCheck className="h-6 w-6" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-green-50 text-green-600 rounded-lg dark:bg-green-950 dark:text-green-400">
+                    <ClipboardCheck className="h-5 sm:h-6 w-5 sm:w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Administration Log</h3>
-                    <p className="text-sm text-muted-foreground">Record administrations and adverse events</p>
+                    <h3 className="font-semibold text-sm sm:text-base">Administration Log</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Record administrations and adverse events
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -173,15 +181,17 @@ export default function NurseDashboard() {
         </div>
 
         {/* Today's Medication Schedule */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Pill className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold sm:text-xl">
+                  {/* <Pill className="h-5 w-5" /> */}
                   Today's Medication Schedule
                 </CardTitle>
-                <CardDescription>Upcoming and completed medication administrations</CardDescription>
+                <CardDescription className="text-sm">
+                  Upcoming and completed medication administrations
+                </CardDescription>
               </div>
               <Link href="/medication-schedule">
                 <Button variant="outline" size="sm">
@@ -190,11 +200,14 @@ export default function NurseDashboard() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 border-0 outline-0 shadow-none">
             <div className="space-y-4">
               {medicationSchedule.map((med) => (
-                <div key={med.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
+                <div
+                  key={med.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-lg"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(med.status)}
                       <span className="font-medium text-sm">{med.time}</span>
@@ -202,11 +215,11 @@ export default function NurseDashboard() {
                     <div>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{med.patient}</span>
-                        <span className="text-sm text-muted-foreground">({med.age}y)</span>
+                        <span className="font-semibold text-sm sm:text-base">{med.patient}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">({med.age}y)</span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm">{med.medication}</span>
+                        <span className="text-xs sm:text-sm">{med.medication}</span>
                         <Badge variant="outline" className="text-xs">
                           {med.route}
                         </Badge>
@@ -214,7 +227,7 @@ export default function NurseDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(med.status)}>
+                    <Badge className={`${getStatusColor(med.status)} text-xs`}>
                       {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
                     </Badge>
                     {med.status === "pending" && <Button size="sm">Administer</Button>}

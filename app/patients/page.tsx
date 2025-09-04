@@ -183,12 +183,12 @@ export default function PatientsPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Patient List</CardTitle>
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-0">
+            <CardTitle className="text-xl font-bold">Patient List</CardTitle>
             <CardDescription>Search and filter patient records</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 border-0 outline-0 shadow-0">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

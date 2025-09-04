@@ -9,7 +9,6 @@ import { Users, Calculator, FileText, Bell, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default function DoctorDashboard() {
-  // Mock data for demonstration
   const stats = {
     totalPatients: 24,
     activePrescriptions: 18,
@@ -80,7 +79,7 @@ export default function DoctorDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
@@ -133,13 +132,13 @@ export default function DoctorDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
+            <CardTitle className='text-xl font-bold'>Quick Actions</CardTitle>
             <CardDescription>Access frequently used tools and features</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
+          <CardContent className="p-0 border-0 outline-0 shadow-none">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {quickActions.map((action) => (
                 <Link key={action.href} href={action.href}>
                   <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -162,15 +161,17 @@ export default function DoctorDashboard() {
         </Card>
 
         {/* Safety Alerts Panel */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="h-5 w-5" />
                   Safety Alerts
                 </CardTitle>
-                <CardDescription>Recent alerts for unsafe prescriptions and dosage warnings</CardDescription>
+                <CardDescription className="p-0 border-0 outline-0 shadow-none">
+                  Recent alerts for unsafe prescriptions and dosage warnings
+                </CardDescription>
               </div>
               <Link href="/alerts">
                 <Button variant="outline" size="sm">
@@ -179,12 +180,12 @@ export default function DoctorDashboard() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-0 border-0 outline-0 shadow-none">
             {recentAlerts.map((alert) => (
               <MedicalAlert key={alert.id} type={alert.type}>
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm">{alert.patient}</span>
                       <Badge variant="outline" className="text-xs">
                         {alert.drug}
@@ -196,7 +197,7 @@ export default function DoctorDashboard() {
                       {alert.time}
                     </div>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" className="whitespace-nowrap">
                     Review
                   </Button>
                 </div>

@@ -94,15 +94,15 @@ export default function MedicationSchedulePage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
       case "overdue":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
       case "missed":
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
   }
 
@@ -145,20 +145,24 @@ export default function MedicationSchedulePage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl mx-auto ">
+        {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Medication Schedule</h1>
-          <p className="text-muted-foreground">Manage patient medication schedules and administration</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Medication Schedule</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage patient medication schedules and administration
+          </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Today's Schedule</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{medications.length}</div>
+              <div className="text-xl sm:text-2xl font-bold">{medications.length}</div>
             </CardContent>
           </Card>
 
@@ -168,7 +172,7 @@ export default function MedicationSchedulePage() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-xl sm:text-2xl font-bold text-green-600">
                 {medications.filter((m) => m.status === "completed").length}
               </div>
             </CardContent>
@@ -180,7 +184,7 @@ export default function MedicationSchedulePage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
+              <div className="text-xl sm:text-2xl font-bold text-yellow-600">
                 {medications.filter((m) => m.status === "pending").length}
               </div>
             </CardContent>
@@ -192,35 +196,41 @@ export default function MedicationSchedulePage() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-xl sm:text-2xl font-bold text-red-600">
                 {medications.filter((m) => m.status === "overdue").length}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Medication Schedule</CardTitle>
-            <CardDescription>View and manage patient medication administrations</CardDescription>
+        {/* Medication Schedule */}
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
+            <CardTitle className="text-xl sm:text-xl">Medication Schedule</CardTitle>
+            <CardDescription className="text-sm">
+              View and manage patient medication administrations
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 border-0 outline-0 shadow-none">
             <div className="mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by patient name or medication..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full max-w-md"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               {filteredMedications.map((med) => (
-                <div key={med.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
+                <div
+                  key={med.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-lg"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(med.status)}
                       <span className="font-medium text-sm">{med.time}</span>
@@ -228,12 +238,12 @@ export default function MedicationSchedulePage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{med.patient}</span>
-                        <span className="text-sm text-muted-foreground">({med.age}y)</span>
+                        <span className="font-semibold text-sm sm:text-base">{med.patient}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">({med.age}y)</span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <Pill className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{med.medication}</span>
+                        <span className="text-xs sm:text-sm">{med.medication}</span>
                         <Badge variant="outline" className="text-xs">
                           {med.route}
                         </Badge>
@@ -242,7 +252,7 @@ export default function MedicationSchedulePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(med.status)}>
+                    <Badge className={`${getStatusColor(med.status)} text-xs`}>
                       {med.status.charAt(0).toUpperCase() + med.status.slice(1)}
                     </Badge>
                     {(med.status === "pending" || med.status === "overdue") && (
@@ -256,15 +266,17 @@ export default function MedicationSchedulePage() {
                             {med.status === "overdue" ? "Urgent" : "Administer"}
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-md">
+                        <DialogContent className="max-w-[95vw] sm:max-w-md">
                           <DialogHeader>
-                            <DialogTitle>Administer Medication</DialogTitle>
-                            <DialogDescription>Record administration for {med.patient}</DialogDescription>
+                            <DialogTitle className="text-lg sm:text-xl">Administer Medication</DialogTitle>
+                            <DialogDescription className="text-sm">
+                              Record administration for {med.patient}
+                            </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div className="p-4 bg-muted rounded-lg">
-                              <div className="font-semibold">{med.medication}</div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="font-semibold text-sm sm:text-base">{med.medication}</div>
+                              <div className="text-xs sm:text-sm text-muted-foreground">
                                 {med.dose} • {med.route} • {med.time}
                               </div>
                             </div>
@@ -274,6 +286,7 @@ export default function MedicationSchedulePage() {
                                 placeholder="Any notes about administration..."
                                 value={administrationNotes}
                                 onChange={(e) => setAdministrationNotes(e.target.value)}
+                                className="min-h-[80px]"
                               />
                             </div>
                             <div className="space-y-2">
@@ -282,13 +295,19 @@ export default function MedicationSchedulePage() {
                                 placeholder="Report any observed side effects..."
                                 value={sideEffects}
                                 onChange={(e) => setSideEffects(e.target.value)}
+                                className="min-h-[80px]"
                               />
                             </div>
-                            <div className="flex justify-end gap-2">
-                              <Button variant="outline" onClick={() => setSelectedMed(null)}>
+                            <div className="flex flex-col sm:flex-row justify-end gap-2">
+                              <Button variant="outline" onClick={() => setSelectedMed(null)} className="w-full sm:w-auto">
                                 Cancel
                               </Button>
-                              <Button onClick={() => handleAdminister(med)}>Confirm Administration</Button>
+                              <Button
+                                onClick={() => handleAdminister(med)}
+                                className="w-full sm:w-auto"
+                              >
+                                Confirm Administration
+                              </Button>
                             </div>
                           </div>
                         </DialogContent>

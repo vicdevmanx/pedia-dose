@@ -158,7 +158,7 @@ export default function PrescriptionsPage() {
     switch (user.role) {
       case "doctor":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Link href={`/prescriptions/${prescription.id}`}>
               <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-2" />
@@ -176,7 +176,7 @@ export default function PrescriptionsPage() {
 
       case "pharmacist":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Link href={`/prescriptions/${prescription.id}`}>
               <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-2" />
@@ -200,7 +200,7 @@ export default function PrescriptionsPage() {
 
       case "nurse":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Link href={`/prescriptions/${prescription.id}`}>
               <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-2" />
@@ -252,16 +252,18 @@ export default function PrescriptionsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl mx-auto ">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Prescriptions</h1>
-            <p className="text-muted-foreground">Manage prescription workflow from creation to administration</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Prescriptions</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage prescription workflow from creation to administration
+            </p>
           </div>
           {user?.role === "doctor" && (
             <Link href="/dosage-calculator">
-              <Button>
+              <Button size="sm">
                 <FileText className="h-4 w-4 mr-2" />
                 New Prescription
               </Button>
@@ -270,14 +272,14 @@ export default function PrescriptionsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
             </CardContent>
           </Card>
 
@@ -287,7 +289,7 @@ export default function PrescriptionsPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+              <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.pending}</div>
             </CardContent>
           </Card>
 
@@ -297,7 +299,7 @@ export default function PrescriptionsPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.inProgress}</div>
             </CardContent>
           </Card>
 
@@ -307,44 +309,44 @@ export default function PrescriptionsPage() {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+              <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.completed}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Prescription List</CardTitle>
-            <CardDescription>Search and filter prescriptions by status and priority</CardDescription>
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
+            <CardTitle className="text-xl sm:text-xl">Prescription List</CardTitle>
+            <CardDescription className="text-sm">
+              Search and filter prescriptions by status and priority
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-4 mb-6">
+          <CardContent className="p-0 border-0 outline-0 shadow-none">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by patient, medication, or doctor..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full max-w-md"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="dispensed">Dispensed</SelectItem>
-                  <SelectItem value="administered">Administered</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  {getTabsForRole().map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -361,30 +363,29 @@ export default function PrescriptionsPage() {
               {filteredPrescriptions.map((prescription) => (
                 <div
                   key={prescription.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                   
+                    <div className="space-y-1">
+                       <div className="flex items-center gap-2 mb-2">
                       {getStatusIcon(prescription.status)}
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         {new Date(prescription.createdDate).toLocaleDateString()}
                       </span>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">{prescription.patientName}</span>
-                        <span className="text-sm text-muted-foreground">({prescription.patientAge}y)</span>
-                        <Badge className={getPriorityColor(prescription.priority)}>
+                        <span className="font-semibold text-sm sm:text-base">{prescription.patientName}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">({prescription.patientAge}y)</span>
+                        <Badge className={`${getPriorityColor(prescription.priority)} text-xs`}>
                           {prescription.priority.toUpperCase()}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Pill className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          {prescription.medication} {prescription.dosage}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm">{prescription.medication} {prescription.dosage}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           • {prescription.route} • {prescription.frequency}
                         </span>
                       </div>
@@ -397,7 +398,7 @@ export default function PrescriptionsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(prescription.status)}>
+                    <Badge className={`${getStatusColor(prescription.status)} text-xs`}>
                       {prescription.status.charAt(0).toUpperCase() + prescription.status.slice(1)}
                     </Badge>
                     {getRoleSpecificActions(prescription)}
@@ -408,9 +409,9 @@ export default function PrescriptionsPage() {
 
             {filteredPrescriptions.length === 0 && (
               <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No prescriptions found</h3>
-                <p className="text-muted-foreground">
+                <FileText className="h-10 sm:h-12 w-10 sm:w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">No prescriptions found</h3>
+                <p className="text-sm text-muted-foreground">
                   {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
                     ? "Try adjusting your search terms or filters"
                     : "No prescriptions available"}

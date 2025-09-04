@@ -214,12 +214,12 @@ export default function DrugsPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card>
-          <CardHeader>
+        <Card className="p-0 border-0 outline-0 shadow-none">
+          <CardHeader className="p-0 border-0 outline-0 shadow-none">
             <CardTitle>Drug Search</CardTitle>
             <CardDescription>Search by drug name, brand name, or indication</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 border-0 outline-0 shadow-none">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -251,7 +251,7 @@ export default function DrugsPage() {
                   key={drug.id}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4"
                 >
-                  <div className="flex items-center gap-4 flex-1">
+                  <div className="flex items-start gap-4 flex-1">
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                       <Pill className="h-6 w-6 text-primary" />
                     </div>
