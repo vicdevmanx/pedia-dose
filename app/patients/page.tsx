@@ -245,9 +245,9 @@ export default function PatientsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4"
+                      className="flex flex-col sm:flex-row items-start mb-2 sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-4"
                     >
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-4 flex-1 ">
                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                           <User className="h-6 w-6 text-primary" />
                         </div>
