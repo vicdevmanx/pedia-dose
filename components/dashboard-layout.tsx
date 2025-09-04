@@ -1,6 +1,6 @@
 import type React from "react"
-
 import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -58,7 +58,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="rounded-full h-8 w-8 border-b-2 border-primary"
+        ></motion.div>
       </div>
     )
   }
@@ -107,157 +111,112 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-card border-b border-border p-4 flex items-center justify-between">
+      <motion.div
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="lg:hidden bg-card border-b border-border p-4 flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
-          <Stethoscope className="h-6 w-6 text-primary" />
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Stethoscope className="h-6 w-6 text-primary" />
+          </motion.div>
           <span className="font-semibold">PediDose</span>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/alerts">
-              <AlertBell />
-            </Link>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Link href="/alerts">
+                <AlertBell />
+              </Link>
+            </motion.div>
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </motion.div>
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
+        <motion.div
+          initial={{ x: -64 }}
+          animate={{ x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0"
+        >
           <div className="flex flex-col flex-grow bg-card border-r border-border">
             {/* Logo */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center justify-between p-6 border-b border-border"
+            >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="p-2 bg-primary/10 rounded-lg"
+                >
                   <Stethoscope className="h-6 w-6 text-primary" />
-                </div>
+                </motion.div>
                 <div>
                   <h1 className="font-bold text-lg">PediDose</h1>
                   <p className="text-xs text-muted-foreground">Dosage System</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/alerts">
-                  <AlertBell />
-                </Link>
-              </Button>
-            </div>
-
-            {/* User Info */}
-            <div className="p-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-semibold text-primary">
-                    {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user.fullName || user.email}</p>
-                  <Badge className={cn("text-xs", getRoleColor(user.role))}>
-                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-2">
-              {navigationItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4" />
-                      {item.label}
-                    </div>
-                    {item.badge && item.badge > 0 && (
-                      <Badge className="h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-500">
-                        {item.badge > 9 ? "9+" : item.badge}
-                      </Badge>
-                    )}
-                  </Link>
-                )
-              })}
-            </nav>
-
-            {/* Footer */}
-            <div className="p-4 border-t border-border space-y-2">
-              <Link
-                href="/settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Sidebar Overlay */}
-        {sidebarOpen && (
-          <div className="lg:hidden fixed inset-0 z-50 flex">
-            <div className="fixed inset-0 bg-black/20" onClick={() => setSidebarOpen(false)} />
-            <div className="relative flex w-64 flex-col bg-card border-r border-border">
-              {/* Same content as desktop sidebar */}
-              <div className="flex items-center justify-between p-6 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Stethoscope className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h1 className="font-bold text-lg">PediDose</h1>
-                    <p className="text-xs text-muted-foreground">Dosage System</p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" asChild>
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                   <Link href="/alerts">
                     <AlertBell />
                   </Link>
-                </Button>
-              </div>
+                </motion.div>
+              </Button>
+            </motion.div>
 
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-primary">
-                      {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{user.fullName || user.email}</p>
+            {/* User Info */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="p-4 border-b border-border"
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"
+                >
+                  <span className="text-sm font-semibold text-primary">
+                    {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </span>
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user.fullName || user.email}</p>
+                  <motion.div whileHover={{ scale: 1.05 }}>
                     <Badge className={cn("text-xs", getRoleColor(user.role))}>
                       {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                     </Badge>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
+            </motion.div>
 
-              <nav className="flex-1 p-4 space-y-2">
-                {navigationItems.map((item) => {
-                  const isActive = pathname === item.href
-                  return (
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-2">
+              {navigationItems.map((item, index) => {
+                const isActive = pathname === item.href
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
                     <Link
-                      key={item.href}
                       href={item.href}
                       className={cn(
                         "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -265,31 +224,45 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted",
                       )}
-                      onClick={() => setSidebarOpen(false)}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon className="h-4 w-4" />
                         {item.label}
                       </div>
                       {item.badge && item.badge > 0 && (
-                        <Badge className="h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-500">
-                          {item.badge > 9 ? "9+" : item.badge}
-                        </Badge>
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        >
+                          <Badge className="h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-500">
+                            {item.badge > 9 ? "9+" : item.badge}
+                          </Badge>
+                        </motion.div>
                       )}
                     </Link>
-                  )
-                })}
-              </nav>
+                  </motion.div>
+                )
+              })}
+            </nav>
 
-              <div className="p-4 border-t border-border space-y-2">
+            {/* Footer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="p-4 border-t border-border space-y-2"
+            >
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/settings"
                   className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  onClick={() => setSidebarOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
                   Settings
                 </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
@@ -298,38 +271,203 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </Button>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
-        )}
+        </motion.div>
+
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.3 }}
+              className="lg:hidden fixed inset-0 z-50 flex"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/20"
+                onClick={() => setSidebarOpen(false)}
+              />
+              <motion.div className="relative flex w-64 flex-col bg-card border-r border-border">
+                {/* Same content as desktop sidebar */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex items-center justify-between p-6 border-b border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className="p-2 bg-primary/10 rounded-lg"
+                    >
+                      <Stethoscope className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h1 className="font-bold text-lg">PediDose</h1>
+                      <p className="text-xs text-muted-foreground">Dosage System</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" asChild>
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                      <Link href="/alerts">
+                        <AlertBell />
+                      </Link>
+                    </motion.div>
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="p-4 border-b border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"
+                    >
+                      <span className="text-sm font-semibold text-primary">
+                        {user.fullName?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                      </span>
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user.fullName || user.email}</p>
+                      <motion.div whileHover={{ scale: 1.05 }}>
+                        <Badge className={cn("text-xs", getRoleColor(user.role))}>
+                          {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </Badge>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <nav className="flex-1 p-4 space-y-2">
+                  {navigationItems.map((item, index) => {
+                    const isActive = pathname === item.href
+                    return (
+                      <motion.div
+                        key={item.href}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                          )}
+                          onClick={() => setSidebarOpen(false)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </div>
+                          {item.badge && item.badge > 0 && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            >
+                              <Badge className="h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-500">
+                                {item.badge > 9 ? "9+" : item.badge}
+                              </Badge>
+                            </motion.div>
+                          )}
+                        </Link>
+                      </motion.div>
+                    )
+                  })}
+                </nav>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="p-4 border-t border-border space-y-2"
+                >
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-64">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex-1 lg:ml-64"
+        >
           <main className="p-4 lg:p-8 pb-20 lg:pb-8">{children}</main>
-        </div>
+        </motion.div>
       </div>
 
       {/* Bottom Navigation for Mobile/Tablet */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+      <motion.div
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border"
+      >
         <div className="flex items-center justify-around p-2">
-          {navigationItems.slice(0, 4).map((item) => {
+          {navigationItems.slice(0, 4).map((item, index) => {
             const isActive = pathname === item.href
             return (
-              <Link
+              <motion.div
                 key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                )}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
-                <item.icon className="h-5 w-5" />
-                <span className="text-xs font-medium">{item.label}</span>
-              </Link>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center gap-1 p-2 rounded-lg transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {/* <span className="text-xs font-medium">{item.label}</span> */}
+                </Link>
+              </motion.div>
             )
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
