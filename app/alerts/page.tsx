@@ -195,7 +195,7 @@ export default function AlertsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col items-start gap-4">
           <div>

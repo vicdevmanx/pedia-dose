@@ -82,7 +82,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       ],
       nurse: [
         { href: `/dashboard/nurse/schedule`, icon: Calendar, label: "Med Schedule" },
-        { href: `/administration`, icon: ClipboardCheck, label: "Administration" },
+        // { href: `/administration`, icon: ClipboardCheck, label: "Administration" },
       ],
       pharmacist: [
         { href: `/dispensing`, icon: Package, label: "Dispensing" },
