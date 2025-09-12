@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,78 +23,107 @@ import {
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
-// Mock detailed drug data
-const mockDrugDetails = {
-  1: {
-    id: 1,
-    name: "Acetaminophen",
-    genericName: "Acetaminophen",
-    brandNames: ["Tylenol", "Panadol", "FeverAll"],
-    category: "Analgesics",
-    dosageForm: "Oral Suspension, Chewable Tablets, Suppositories",
-    concentration: "160mg/5ml, 80mg/ml, 80mg chewable",
-    indication: "Pain relief, fever reduction",
-    ageRange: "0-18 years",
-    mechanism: "Inhibits cyclooxygenase enzymes and blocks pain pathways in the central nervous system",
-    dosageGuidelines: {
-      mgPerKg: "10-15 mg/kg every 4-6 hours",
-      mgPerM2: "Not typically calculated by BSA",
-      maxDaily: "75 mg/kg/day (maximum 4000mg/day)",
-      routes: ["Oral", "Rectal"],
-      frequency: "Every 4-6 hours as needed",
-    },
-    contraindications: [
-      "Severe hepatic impairment",
-      "Known hypersensitivity to acetaminophen",
-      "Chronic alcohol use (relative contraindication)",
-    ],
-    warnings: [
-      "Hepatotoxicity risk with overdose",
-      "Maximum daily dose limits must be observed",
-      "Monitor cumulative dose from all sources",
-      "Use caution in patients with hepatic impairment",
-    ],
-    interactions: [
-      "Warfarin - may enhance anticoagulant effect",
-      "Alcohol - increased risk of hepatotoxicity",
-      "Phenytoin - may increase acetaminophen toxicity",
-    ],
-    sideEffects: {
-      common: ["Nausea", "Vomiting", "Constipation"],
-      serious: ["Hepatotoxicity", "Severe skin reactions", "Acute renal failure"],
-      rare: ["Thrombocytopenia", "Neutropenia", "Pancytopenia"],
-    },
-    monitoring: [
-      "Liver function tests if prolonged use",
-      "Signs of hepatotoxicity",
-      "Pain and fever response",
-      "Cumulative daily dose",
-    ],
-    storage: "Store at room temperature, protect from moisture",
-    status: "active",
-  },
+interface Drug {
+  id: string
+  name: string
+  genericName: string
+  brandNames: string[]
+  category: string
+  dosageForm: string | null
+  concentration: string | null
+  indication: string | null
+  ageRange: string | null
+  dosageGuidelines: {
+    mgPerKg: string
+    mgPerM2: string
+    maxDaily: string
+    routes: string[]
+    frequency: string
+  }
+  warnings: string[]
+  contraindications: string[]
+  sideEffects: {
+    common: string[]
+    serious: string[]
+    rare: string[]
+  } | null
+  interactions: string[]
+  status: string | null
+  mechanism: string | null
+  monitoring: string[]
+  storage: string | null
 }
 
 export default function DrugDetailPage() {
   const params = useParams()
-  const drugId = Number.parseInt(params.id as string)
+  const drugId = params.id as string
+  const [drug, setDrug] = useState<Drug | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // In a real app, you'd fetch drug data based on the ID
-  const drug = mockDrugDetails[drugId as keyof typeof mockDrugDetails]
+  const fetchDrug = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/drugs/${drugId}`)
+      if (!response.ok) throw new Error('Drug not found')
+      const data = await response.json()
+      // Ensure sideEffects is an object with common, serious, rare arrays
+      const sideEffects = data.sideEffects && typeof data.sideEffects === 'object' && 'common' in data.sideEffects
+        ? data.sideEffects
+        : { common: [], serious: [], rare: [] }
+      setDrug({
+        ...data,
+        sideEffects,
+        brandNames: data.brandNames || [],
+        warnings: data.warnings || [],
+        contraindications: data.contraindications || [],
+        interactions: data.interactions || [],
+        monitoring: data.monitoring || [],
+      })
+    } catch (err) {
+      setError('Error fetching drug details')
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-  if (!drug) {
+  useEffect(() => {
+    if (drugId) {
+      fetchDrug()
+    }
+  }, [drugId])
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Loading...</h2>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (error || !drug) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
           <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Drug Not Found</h2>
-          <p className="text-muted-foreground mb-4">The requested drug information is not available.</p>
-          <Link href="/drugs">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Drug Database
+          <p className="text-muted-foreground mb-4">{error || "The requested drug information is not available."}</p>
+          <div className="flex gap-4 justify-center">
+            <Button onClick={fetchDrug} variant="outline">
+              Retry
             </Button>
-          </Link>
+            <Link href="/drugs">
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Drug Database
+              </Button>
+            </Link>
+          </div>
         </div>
       </DashboardLayout>
     )
@@ -114,8 +144,8 @@ export default function DrugDetailPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col justify-between">
+          <div className="flex flex-col gap-4">
             <Link href="/drugs">
               <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -128,16 +158,16 @@ export default function DrugDetailPage() {
                 <Badge className={getCategoryColor(drug.category)}>{drug.category}</Badge>
               </div>
               <p className="text-muted-foreground">
-                Generic: {drug.genericName} • Age Range: {drug.ageRange}
+                Generic: {drug.genericName} • Age Range: {drug.ageRange || "N/A"}
               </p>
             </div>
           </div>
-          <Link href={`/dosage-calculator?drugId=${drug.id}`}>
+          {/* <Link href={`/dosage-calculator?drugId=${drug.id}`}>
             <Button>
               <Calculator className="h-4 w-4 mr-2" />
               Calculate Dosage
             </Button>
-          </Link>
+          </Link> */}
         </div>
 
         {/* Drug Overview Cards */}
@@ -148,7 +178,7 @@ export default function DrugDetailPage() {
               <Pill className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm font-medium">{drug.dosageForm}</div>
+              <div className="text-sm font-medium">{drug.dosageForm || "N/A"}</div>
             </CardContent>
           </Card>
 
@@ -158,7 +188,7 @@ export default function DrugDetailPage() {
               <Info className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm font-medium">{drug.concentration}</div>
+              <div className="text-sm font-medium">{drug.concentration || "N/A"}</div>
             </CardContent>
           </Card>
 
@@ -168,7 +198,7 @@ export default function DrugDetailPage() {
               <Zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm font-medium">{drug.dosageGuidelines.routes.join(", ")}</div>
+              <div className="text-sm font-medium">{drug.dosageGuidelines.routes.join(", ") || "N/A"}</div>
             </CardContent>
           </Card>
 
@@ -178,7 +208,7 @@ export default function DrugDetailPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm font-medium">{drug.dosageGuidelines.frequency}</div>
+              <div className="text-sm font-medium">{drug.dosageGuidelines.frequency || "N/A"}</div>
             </CardContent>
           </Card>
         </div>
@@ -187,7 +217,7 @@ export default function DrugDetailPage() {
         {drug.warnings.length > 0 && (
           <MedicalAlert type="caution" title="Important Safety Information">
             <ul className="list-disc list-inside space-y-1">
-              {drug.warnings.map((warning, index) => (
+              {drug.warnings.map((warning: string, index: number) => (
                 <li key={index} className="text-sm">
                   {warning}
                 </li>
@@ -224,12 +254,12 @@ export default function DrugDetailPage() {
                         Weight-Based Dosing
                       </h4>
                       <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-lg font-semibold text-primary">{drug.dosageGuidelines.mgPerKg}</p>
+                        <p className="text-lg font-semibold text-primary">{drug.dosageGuidelines.mgPerKg || "N/A"}</p>
                         <p className="text-sm text-muted-foreground">Milligrams per kilogram of body weight</p>
                       </div>
                     </div>
 
-                    {drug.dosageGuidelines.mgPerM2 !== "Not typically calculated by BSA" && (
+                    {drug.dosageGuidelines.mgPerM2 && drug.dosageGuidelines.mgPerM2 !== "Not typically calculated by BSA" && (
                       <div>
                         <h4 className="font-semibold mb-2 flex items-center gap-2">
                           <Ruler className="h-4 w-4" />
@@ -250,7 +280,7 @@ export default function DrugDetailPage() {
                       <h4 className="font-semibold mb-2">Maximum Daily Dose</h4>
                       <div className="p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950 dark:border-red-800">
                         <p className="text-lg font-semibold text-red-700 dark:text-red-300">
-                          {drug.dosageGuidelines.maxDaily}
+                          {drug.dosageGuidelines.maxDaily || "N/A"}
                         </p>
                         <p className="text-sm text-red-600 dark:text-red-400">Do not exceed this amount in 24 hours</p>
                       </div>
@@ -259,29 +289,34 @@ export default function DrugDetailPage() {
                     <div>
                       <h4 className="font-semibold mb-2">Administration Routes</h4>
                       <div className="flex flex-wrap gap-2">
-                        {drug.dosageGuidelines.routes.map((route) => (
+                        {drug.dosageGuidelines.routes.map((route: string) => (
                           <Badge key={route} variant="secondary">
                             {route}
                           </Badge>
                         ))}
+                        {drug.dosageGuidelines.routes.length === 0 && (
+                          <p className="text-sm text-muted-foreground">No routes specified</p>
+                        )}
                       </div>
                     </div>
 
                     <div>
                       <h4 className="font-semibold mb-2">Frequency</h4>
-                      <p className="text-sm">{drug.dosageGuidelines.frequency}</p>
+                      <p className="text-sm">{drug.dosageGuidelines.frequency || "N/A"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Mechanism of Action</h4>
-                  <p className="text-sm text-muted-foreground">{drug.mechanism}</p>
-                </div>
+                {drug.mechanism && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Mechanism of Action</h4>
+                    <p className="text-sm text-muted-foreground">{drug.mechanism}</p>
+                  </div>
+                )}
 
                 <div>
                   <h4 className="font-semibold mb-2">Indication</h4>
-                  <p className="text-sm">{drug.indication}</p>
+                  <p className="text-sm">{drug.indication || "N/A"}</p>
                 </div>
               </CardContent>
             </Card>
@@ -299,12 +334,15 @@ export default function DrugDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {drug.contraindications.map((contraindication, index) => (
+                    {drug.contraindications.map((contraindication: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                         <span className="text-sm">{contraindication}</span>
                       </li>
                     ))}
+                    {drug.contraindications.length === 0 && (
+                      <p className="text-sm text-muted-foreground">No contraindications specified</p>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -319,25 +357,30 @@ export default function DrugDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {drug.warnings.map((warning, index) => (
+                    {drug.warnings.map((warning: string, index: number) => (
                       <li key={index} className="flex items-start gap-2">
                         <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
                         <span className="text-sm">{warning}</span>
                       </li>
                     ))}
+                    {drug.warnings.length === 0 && (
+                      <p className="text-sm text-muted-foreground">No warnings specified</p>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Storage & Handling</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm">{drug.storage}</p>
-              </CardContent>
-            </Card>
+            {drug.storage && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Storage & Handling</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{drug.storage}</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="interactions" className="space-y-4">
@@ -351,11 +394,14 @@ export default function DrugDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {drug.interactions.map((interaction, index) => (
+                  {drug.interactions.map((interaction: string, index: number) => (
                     <div key={index} className="p-3 border rounded-lg">
                       <p className="text-sm">{interaction}</p>
                     </div>
                   ))}
+                  {drug.interactions.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No interactions specified</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -369,11 +415,14 @@ export default function DrugDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-1">
-                    {drug.sideEffects.common.map((effect, index) => (
+                    {(drug.sideEffects?.common || []).map((effect: string, index: number) => (
                       <li key={index} className="text-sm">
                         • {effect}
                       </li>
                     ))}
+                    {(!drug.sideEffects?.common || drug.sideEffects.common.length === 0) && (
+                      <p className="text-sm text-muted-foreground">No common side effects specified</p>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -384,11 +433,14 @@ export default function DrugDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-1">
-                    {drug.sideEffects.serious.map((effect, index) => (
+                    {(drug.sideEffects?.serious || []).map((effect: string, index: number) => (
                       <li key={index} className="text-sm">
                         • {effect}
                       </li>
                     ))}
+                    {(!drug.sideEffects?.serious || drug.sideEffects.serious.length === 0) && (
+                      <p className="text-sm text-muted-foreground">No serious side effects specified</p>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -399,11 +451,14 @@ export default function DrugDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-1">
-                    {drug.sideEffects.rare.map((effect, index) => (
+                    {(drug.sideEffects?.rare || []).map((effect: string, index: number) => (
                       <li key={index} className="text-sm">
                         • {effect}
                       </li>
                     ))}
+                    {(!drug.sideEffects?.rare || drug.sideEffects.rare.length === 0) && (
+                      <p className="text-sm text-muted-foreground">No rare side effects specified</p>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -421,12 +476,15 @@ export default function DrugDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {drug.monitoring.map((parameter, index) => (
+                  {drug.monitoring.map((parameter: string, index: number) => (
                     <li key={index} className="flex items-start gap-2">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                       <span className="text-sm">{parameter}</span>
                     </li>
                   ))}
+                  {drug.monitoring.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No monitoring parameters specified</p>
+                  )}
                 </ul>
               </CardContent>
             </Card>

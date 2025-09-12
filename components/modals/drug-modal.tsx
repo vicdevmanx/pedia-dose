@@ -10,10 +10,15 @@ import { Badge } from "@/components/ui/badge"
 import { X, Plus, Pill } from "lucide-react"
 
 interface Drug {
-  id?: number
+  id?: string
   name: string
   genericName: string
+  brandNames: string[]
   category: string
+  dosageForm: string
+  concentration: string
+  indication: string
+  ageRange: string
   dosageGuidelines: {
     mgPerKg: string
     mgPerM2: string
@@ -25,6 +30,7 @@ interface Drug {
   contraindications: string[]
   sideEffects: string[]
   interactions: string[]
+  status: string
 }
 
 interface DrugModalProps {
@@ -39,7 +45,12 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
   const [formData, setFormData] = useState<Drug>({
     name: "",
     genericName: "",
+    brandNames: [],
     category: "",
+    dosageForm: "",
+    concentration: "",
+    indication: "",
+    ageRange: "",
     dosageGuidelines: {
       mgPerKg: "",
       mgPerM2: "",
@@ -51,12 +62,14 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
     contraindications: [],
     sideEffects: [],
     interactions: [],
+    status: "active",
   })
   const [newRoute, setNewRoute] = useState("")
   const [newWarning, setNewWarning] = useState("")
   const [newContraindication, setNewContraindication] = useState("")
   const [newSideEffect, setNewSideEffect] = useState("")
   const [newInteraction, setNewInteraction] = useState("")
+  const [newBrandName, setNewBrandName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -66,7 +79,12 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
       setFormData({
         name: "",
         genericName: "",
+        brandNames: [],
         category: "",
+        dosageForm: "",
+        concentration: "",
+        indication: "",
+        ageRange: "",
         dosageGuidelines: {
           mgPerKg: "",
           mgPerM2: "",
@@ -78,6 +96,7 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
         contraindications: [],
         sideEffects: [],
         interactions: [],
+        status: "active",
       })
     }
   }, [drug, mode, isOpen])
@@ -85,15 +104,7 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
   const handleSave = async () => {
     setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const drugData = {
-        ...formData,
-        id: mode === "edit" ? drug?.id : Date.now(),
-      }
-
-      onSave(drugData)
-      onClose()
+      await onSave(formData)
     } catch (error) {
       console.error("Error saving drug:", error)
     } finally {
@@ -158,9 +169,60 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
     }))
   }
 
+  const addSideEffect = () => {
+    if (newSideEffect.trim() && !formData.sideEffects.includes(newSideEffect.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        sideEffects: [...prev.sideEffects, newSideEffect.trim()],
+      }))
+      setNewSideEffect("")
+    }
+  }
+
+  const removeSideEffect = (sideEffect: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      sideEffects: prev.sideEffects.filter((s) => s !== sideEffect),
+    }))
+  }
+
+  const addInteraction = () => {
+    if (newInteraction.trim() && !formData.interactions.includes(newInteraction.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        interactions: [...prev.interactions, newInteraction.trim()],
+      }))
+      setNewInteraction("")
+    }
+  }
+
+  const removeInteraction = (interaction: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      interactions: prev.interactions.filter((i) => i !== interaction),
+    }))
+  }
+
+  const addBrandName = () => {
+    if (newBrandName.trim() && !formData.brandNames.includes(newBrandName.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        brandNames: [...prev.brandNames, newBrandName.trim()],
+      }))
+      setNewBrandName("")
+    }
+  }
+
+  const removeBrandName = (brand: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      brandNames: prev.brandNames.filter((b) => b !== brand),
+    }))
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} >
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl" >
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle className="flex gap-2">
             <Pill className="h-5 w-5" />
@@ -194,7 +256,32 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
                   placeholder="Enter generic name"
                 />
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
+                <Label htmlFor="brand-names">Brand Names</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={newBrandName}
+                    onChange={(e) => setNewBrandName(e.target.value)}
+                    placeholder="Add brand name"
+                    onKeyPress={(e) => e.key === "Enter" && addBrandName()}
+                  />
+                  <Button type="button" onClick={addBrandName} size="sm">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.brandNames.map((brand) => (
+                    <Badge key={brand} variant="secondary" className="flex items-center gap-1">
+                      {brand}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeBrandName(brand)} />
+                    </Badge>
+                  ))}
+                  {formData.brandNames.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No brand names added</p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select
                   value={formData.category}
@@ -215,6 +302,42 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dosage-form">Dosage Form</Label>
+                <Input
+                  id="dosage-form"
+                  value={formData.dosageForm}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, dosageForm: e.target.value }))}
+                  placeholder="e.g., Oral Suspension, Tablets"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="concentration">Concentration</Label>
+                <Input
+                  id="concentration"
+                  value={formData.concentration}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, concentration: e.target.value }))}
+                  placeholder="e.g., 160mg/5ml, 80mg/ml"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="indication">Indication</Label>
+                <Input
+                  id="indication"
+                  value={formData.indication}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, indication: e.target.value }))}
+                  placeholder="e.g., Pain relief, fever reduction"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age-range">Age Range</Label>
+                <Input
+                  id="age-range"
+                  value={formData.ageRange}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, ageRange: e.target.value }))}
+                  placeholder="e.g., 0-18 years"
+                />
               </div>
             </div>
           </div>
@@ -281,7 +404,6 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
               </div>
             </div>
 
-            {/* Routes */}
             <div className="space-y-2">
               <Label>Administration Routes *</Label>
               <div className="flex gap-2">
@@ -374,6 +496,72 @@ export function DrugModal({ isOpen, onClose, onSave, drug, mode }: DrugModalProp
               ))}
               {formData.contraindications.length === 0 && (
                 <p className="text-sm text-muted-foreground">No contraindications added</p>
+              )}
+            </div>
+          </div>
+
+          {/* Side Effects */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Side Effects</h3>
+            <div className="flex gap-2">
+              <Input
+                value={newSideEffect}
+                onChange={(e) => setNewSideEffect(e.target.value)}
+                placeholder="Add side effect"
+                onKeyPress={(e) => e.key === "Enter" && addSideEffect()}
+              />
+              <Button type="button" onClick={addSideEffect} size="sm">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {formData.sideEffects.map((sideEffect, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded dark:bg-gray-950 dark:border-gray-800"
+                >
+                  <span className="text-sm">{sideEffect}</span>
+                  <X
+                    className="h-4 w-4 cursor-pointer text-gray-600"
+                    onClick={() => removeSideEffect(sideEffect)}
+                  />
+                </div>
+              ))}
+              {formData.sideEffects.length === 0 && (
+                <p className="text-sm text-muted-foreground">No side effects added</p>
+              )}
+            </div>
+          </div>
+
+          {/* Interactions */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Interactions</h3>
+            <div className="flex gap-2">
+              <Input
+                value={newInteraction}
+                onChange={(e) => setNewInteraction(e.target.value)}
+                placeholder="Add interaction"
+                onKeyPress={(e) => e.key === "Enter" && addInteraction()}
+              />
+              <Button type="button" onClick={addInteraction} size="sm">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {formData.interactions.map((interaction, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded dark:bg-blue-950 dark:border-blue-800"
+                >
+                  <span className="text-sm">{interaction}</span>
+                  <X
+                    className="h-4 w-4 cursor-pointer text-blue-600"
+                    onClick={() => removeInteraction(interaction)}
+                  />
+                </div>
+              ))}
+              {formData.interactions.length === 0 && (
+                <p className="text-sm text-muted-foreground">No interactions added</p>
               )}
             </div>
           </div>
