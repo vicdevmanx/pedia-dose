@@ -11,8 +11,8 @@
   --card-foreground: oklch(0.35 0 0); /* Dark gray card text */
   --popover: oklch(0.98 0 0); /* Light gray popover */
   --popover-foreground: oklch(0.35 0 0); /* Dark gray popover text */
-  --primary:  oklch(0.62 0.14 240);; /* Medical blue primary */
-  --primary-foreground: oklch(1 0 0); /* White text on primary */
+  --primary:  #3c83f6; /* Medical blue primary */
+  --primary-foreground: #e7eefa; /* White text on primary */
   --secondary: oklch(0.63 0.13 250); /* Lighter blue secondary */
   --secondary-foreground: oklch(1 0 0); /* White text on secondary */
   --muted: oklch(0.98 0 0); /* Light gray muted */
