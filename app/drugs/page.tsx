@@ -13,13 +13,31 @@ import Link from "next/link"
 
 const drugCategories = [
   "All Categories",
-  "Analgesics",
+  "Analgesic/Antipyretic",
   "Antibiotics",
   "NSAIDs",
-  "Bronchodilators",
-  "Antiemetics",
-  "Antihistamines",
-  "Corticosteroids",
+  "Bronchodilator",
+  "Antiemetic",
+  "Antihistamine",
+  "Corticosteroid",
+  "Antithyroid Agent",
+  "Thyroid Hormone",
+  "Opioid Antagonist",
+  "Proton Pump Inhibitor",
+  "Hormone",
+  "Antibiotic/Antiprotozoal",
+  "Opioid Analgesic",
+  "Cardiac Glycoside",
+  "Leukotriene Receptor Antagonist",
+  "First Generation Antihistamine",
+  "Antiflatulent",
+  "Stimulant Laxative",
+  "Anticonvulsant",
+  "Antifungal",
+  "Prokinetic",
+  "Stool Softener",
+  "Loop Diuretic",
+  "Analgesics", // For Thjjjjjj
 ]
 
 export default function DrugsPage() {
@@ -35,38 +53,88 @@ export default function DrugsPage() {
   // Fetch drugs on mount and when filters change
   useEffect(() => {
     const fetchDrugs = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
+      setError(null)
       try {
-        const params = new URLSearchParams();
-        if (searchTerm) params.set('search', searchTerm);
-        if (selectedCategory !== 'All Categories') params.set('category', selectedCategory);
+        const params = new URLSearchParams()
+        if (searchTerm) params.set('search', searchTerm)
+        if (selectedCategory !== 'All Categories') params.set('category', selectedCategory)
 
-        const response = await fetch(`/api/drugs?${params.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch drugs');
-        const data = await response.json();
-        setDrugs(data);
-      } catch (err) {
-        setError('Error fetching drugs');
-        console.error(err);
+        const response = await fetch(`/api/drugs?${params.toString()}`)
+        let data
+        try {
+          data = await response.json()
+        } catch {
+          throw new Error('API returned invalid JSON')
+        }
+        if (!response.ok) throw new Error(data.error || 'Failed to fetch drugs')
+        // Normalize data
+        const normalizedDrugs = Array.isArray(data)
+          ? data.map((drug: any) => ({
+              ...drug,
+              sideEffects:
+                drug.sideEffects && typeof drug.sideEffects === 'object' && 'common' in drug.sideEffects
+                  ? drug.sideEffects
+                  : { common: [], serious: [], rare: [] },
+              brandNames: drug.brandNames || [],
+              warnings: drug.warnings || [],
+              contraindications: drug.contraindications || [],
+              interactions: drug.interactions || [],
+              monitoring: drug.monitoring || [],
+              dosageGuidelines: {
+                mgPerKg: drug.dosageGuidelines?.mgPerKg || drug.dosageGuidelines?.weight_based || 'Not specified',
+                mgPerM2: drug.dosageGuidelines?.mgPerM2 || 'Not typically calculated by BSA',
+                maxDaily: drug.dosageGuidelines?.maxDaily || drug.dosageGuidelines?.max_daily || 'Not specified',
+                routes: drug.dosageGuidelines?.routes || ['Unknown'],
+                frequency:
+                  drug.dosageGuidelines?.frequency ||
+                  drug.dosageGuidelines?.age_based ||
+                  drug.dosageGuidelines?.duration ||
+                  'As prescribed',
+              },
+            }))
+          : []
+        setDrugs(normalizedDrugs)
+      } catch (err: any) {
+        setError(err.message || 'Error fetching drugs')
+        console.error(err)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchDrugs();
-  }, [searchTerm, selectedCategory]);
+    fetchDrugs()
+  }, [searchTerm, selectedCategory])
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      Analgesics: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      Antibiotics: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      NSAIDs: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-      Bronchodilators: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      Antiemetics: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
-      Antihistamines: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
-      Corticosteroids: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      'Analgesic/Antipyretic': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      Antibiotics: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      NSAIDs: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+      Bronchodilator: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+      Antiemetic: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+      Antihistamine: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+      Corticosteroid: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      'Antithyroid Agent': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+      'Thyroid Hormone': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
+      'Opioid Antagonist': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      'Proton Pump Inhibitor': 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
+      Hormone: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+      'Antibiotic/Antiprotozoal': 'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200',
+      'Opioid Analgesic': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+      'Cardiac Glycoside': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+      'Leukotriene Receptor Antagonist': 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
+      'First Generation Antihistamine': 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100',
+      Antiflatulent: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+      'Stimulant Laxative': 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100',
+      Anticonvulsant: 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100',
+      Antifungal: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100',
+      Prokinetic: 'bg-pink-200 text-pink-900 dark:bg-pink-800 dark:text-pink-100',
+      'Stool Softener': 'bg-teal-200 text-teal-900 dark:bg-teal-800 dark:text-teal-100',
+      'Loop Diuretic': 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100',
+      Analgesics: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', // For Thjjjjjj
     }
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
   }
 
   const hasWarnings = (warnings: string[]) => {
@@ -75,36 +143,56 @@ export default function DrugsPage() {
 
   const handleAddDrug = async (newDrug: any) => {
     try {
+      const normalizedDrug = {
+        ...newDrug,
+        dosageGuidelines: {
+          mgPerKg: newDrug.dosageGuidelines?.mgPerKg || 'Not specified',
+          mgPerM2: newDrug.dosageGuidelines?.mgPerM2 || 'Not typically calculated by BSA',
+          maxDaily: newDrug.dosageGuidelines?.maxDaily || 'Not specified',
+          routes: newDrug.dosageGuidelines?.routes || ['Unknown'],
+          frequency: newDrug.dosageGuidelines?.frequency || 'As prescribed',
+        },
+      }
       const response = await fetch('/api/drugs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDrug),
-      });
-      if (!response.ok) throw new Error('Failed to add drug');
-      const addedDrug = await response.json();
-      setDrugs([...drugs, addedDrug]);
-      setShowAddModal(false);
+        body: JSON.stringify(normalizedDrug),
+      })
+      if (!response.ok) throw new Error('Failed to add drug')
+      const addedDrug = await response.json()
+      setDrugs([...drugs, addedDrug])
+      setShowAddModal(false)
     } catch (err) {
-      console.error('Error adding drug:', err);
-      setError('Error adding drug');
+      console.error('Error adding drug:', err)
+      setError('Error adding drug')
     }
   }
 
   const handleEditDrug = async (updatedDrug: any) => {
     try {
+      const normalizedDrug = {
+        ...updatedDrug,
+        dosageGuidelines: {
+          mgPerKg: updatedDrug.dosageGuidelines?.mgPerKg || 'Not specified',
+          mgPerM2: updatedDrug.dosageGuidelines?.mgPerM2 || 'Not typically calculated by BSA',
+          maxDaily: updatedDrug.dosageGuidelines?.maxDaily || 'Not specified',
+          routes: updatedDrug.dosageGuidelines?.routes || ['Unknown'],
+          frequency: updatedDrug.dosageGuidelines?.frequency || 'As prescribed',
+        },
+      }
       const response = await fetch(`/api/drugs/${selectedDrug.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedDrug),
-      });
-      if (!response.ok) throw new Error('Failed to update drug');
-      const updated = await response.json();
-      setDrugs(drugs.map((d) => (d.id === selectedDrug.id ? updated : d)));
-      setShowEditModal(false);
-      setSelectedDrug(null);
+        body: JSON.stringify(normalizedDrug),
+      })
+      if (!response.ok) throw new Error('Failed to update drug')
+      const updated = await response.json()
+      setDrugs(drugs.map((d) => (d.id === selectedDrug.id ? updated : d)))
+      setShowEditModal(false)
+      setSelectedDrug(null)
     } catch (err) {
-      console.error('Error updating drug:', err);
-      setError('Error updating drug');
+      console.error('Error updating drug:', err)
+      setError('Error updating drug')
     }
   }
 
@@ -112,12 +200,12 @@ export default function DrugsPage() {
     try {
       const response = await fetch(`/api/drugs/${id}`, {
         method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete drug');
-      setDrugs(drugs.filter((d) => d.id !== id));
+      })
+      if (!response.ok) throw new Error('Failed to delete drug')
+      setDrugs(drugs.filter((d) => d.id !== id))
     } catch (err) {
-      console.error('Error deleting drug:', err);
-      setError('Error deleting drug');
+      console.error('Error deleting drug:', err)
+      setError('Error deleting drug')
     }
   }
 
@@ -143,8 +231,11 @@ export default function DrugsPage() {
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 text-red-700 rounded">
-            {error}
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-950 dark:border-red-800">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <span className="text-sm font-medium text-red-800 dark:text-red-200">{error}</span>
+            </div>
           </div>
         )}
 
@@ -225,7 +316,10 @@ export default function DrugsPage() {
             </div>
 
             {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              </div>
             ) : (
               <div className="space-y-4">
                 {drugs.map((drug) => (
@@ -253,17 +347,18 @@ export default function DrugsPage() {
                             <span className="font-medium">Generic:</span> {drug.genericName}
                           </p>
                           <p>
-                            <span className="font-medium">Brands:</span> {drug.brandNames.join(", ")}
+                            <span className="font-medium">Brands:</span>{" "}
+                            {drug.brandNames.length > 0 ? drug.brandNames.join(", ") : "N/A"}
                           </p>
                           <p>
-                            <span className="font-medium">Form:</span> {drug.dosageForm}
+                            <span className="font-medium">Form:</span> {drug.dosageForm || "N/A"}
                           </p>
                         </div>
                         <div className="text-sm">
-                          <span className="font-medium">Indication:</span> {drug.indication}
+                          <span className="font-medium">Indication:</span> {drug.indication || "N/A"}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Age range: {drug.ageRange} • Concentration: {drug.concentration}
+                          Age range: {drug.ageRange || "N/A"} • Concentration: {drug.concentration || "N/A"}
                         </div>
                       </div>
                     </div>

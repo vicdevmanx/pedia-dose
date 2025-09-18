@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch drugs' }, { status: 500 });
     }
 
+    // console.log(data)
+
     return NextResponse.json(data);
   } catch (error) {
     console.error('Server error:', error);

@@ -66,23 +66,42 @@ export default function DrugDetailPage() {
     setError(null)
     try {
       const response = await fetch(`/api/drugs/${drugId}`)
-      if (!response.ok) throw new Error('Drug not found')
-      const data = await response.json()
-      // Ensure sideEffects is an object with common, serious, rare arrays
-      const sideEffects = data.sideEffects && typeof data.sideEffects === 'object' && 'common' in data.sideEffects
-        ? data.sideEffects
-        : { common: [], serious: [], rare: [] }
+      let data
+      try {
+        data = await response.json()
+      } catch {
+        throw new Error('API returned invalid JSON')
+      }
+      if (!response.ok) throw new Error(data.error || 'Drug not found')
+
+      // Normalize data to match Drug interface
       setDrug({
         ...data,
-        sideEffects,
-        brandNames: data.brandNames || [],
-        warnings: data.warnings || [],
-        contraindications: data.contraindications || [],
-        interactions: data.interactions || [],
-        monitoring: data.monitoring || [],
+        brandNames: Array.isArray(data.brandNames) ? data.brandNames : [],
+        warnings: Array.isArray(data.warnings) ? data.warnings : [],
+        contraindications: Array.isArray(data.contraindications) ? data.contraindications : [],
+        interactions: Array.isArray(data.interactions) ? data.interactions : [],
+        monitoring: Array.isArray(data.monitoring) ? data.monitoring : [],
+        sideEffects: data.sideEffects && typeof data.sideEffects === 'object' && 'common' in data.sideEffects
+          ? data.sideEffects
+          : { common: [], serious: [], rare: [] },
+        dosageGuidelines: {
+          mgPerKg: data.dosageGuidelines?.mgPerKg || data.dosageGuidelines?.weight_based || 'Not specified',
+          mgPerM2: data.dosageGuidelines?.mgPerM2 || 'Not typically calculated by BSA',
+          maxDaily: data.dosageGuidelines?.maxDaily || data.dosageGuidelines?.max_daily || 'Not specified',
+          routes: JSON.parse(data.dosageGuidelines?.routes) || ['unKnown'],
+          frequency: data.dosageGuidelines?.frequency || data.dosageGuidelines?.age_based || data.dosageGuidelines?.duration || 'As prescribed',
+          ...data.dosageGuidelines, // Preserve other fields
+        },
+        status: data.status || 'active',
+        mechanism: data.mechanism || '',
+        storage: data.storage || '',
       })
-    } catch (err) {
-      setError('Error fetching drug details')
+
+      console.log(typeof JSON.parse(data.dosageGuidelines?.routes) || ['unKnown'])
+      // console.log( Array.isArray(data.dosageGuidelines?.routes) ? data.dosageGuidelines.routes : ['Unknown'])
+    } catch (err: any) {
+      setError(err.message || 'Error fetching drug details')
       console.error(err)
     } finally {
       setIsLoading(false)
@@ -99,7 +118,7 @@ export default function DrugDetailPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold mb-2">Loading...</h2>
         </div>
       </DashboardLayout>
@@ -130,14 +149,34 @@ export default function DrugDetailPage() {
   }
 
   const getCategoryColor = (category: string) => {
-    const colors = {
-      Analgesics: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      Antibiotics: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      NSAIDs: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-      Bronchodilators: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      Antiemetics: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
+    const colors: { [key: string]: string } = {
+      'Analgesic/Antipyretic': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      'Antibiotics': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      'NSAIDs': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+      'Bronchodilator': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+      'Antiemetic': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+      'Antihistamine': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+      'Corticosteroid': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+      'Antithyroid Agent': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
+      'Thyroid Hormone': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
+      'Opioid Antagonist': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      'Proton Pump Inhibitor': 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
+      'Hormone': 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+      'Antibiotic/Antiprotozoal': 'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200',
+      'Opioid Analgesic': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+      'Cardiac Glycoside': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+      'Leukotriene Receptor Antagonist': 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200',
+      'First Generation Antihistamine': 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100',
+      'Antiflatulent': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+      'Stimulant Laxative': 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100',
+      'Anticonvulsant': 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100',
+      'Antifungal': 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100',
+      'Prokinetic': 'bg-pink-200 text-pink-900 dark:bg-pink-800 dark:text-pink-100',
+      'Stool Softener': 'bg-teal-200 text-teal-900 dark:bg-teal-800 dark:text-teal-100',
+      'Loop Diuretic': 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100',
+      'Analgesics': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     }
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
   }
 
   return (
@@ -162,12 +201,6 @@ export default function DrugDetailPage() {
               </p>
             </div>
           </div>
-          {/* <Link href={`/dosage-calculator?drugId=${drug.id}`}>
-            <Button>
-              <Calculator className="h-4 w-4 mr-2" />
-              Calculate Dosage
-            </Button>
-          </Link> */}
         </div>
 
         {/* Drug Overview Cards */}
@@ -198,7 +231,9 @@ export default function DrugDetailPage() {
               <Zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-sm font-medium">{drug.dosageGuidelines.routes.join(", ") || "N/A"}</div>
+              <div className="text-sm font-medium">
+                { JSON.parse(drug.dosageGuidelines?.routes).join(', ')|| "N/A"}
+              </div>
             </CardContent>
           </Card>
 
@@ -289,12 +324,13 @@ export default function DrugDetailPage() {
                     <div>
                       <h4 className="font-semibold mb-2">Administration Routes</h4>
                       <div className="flex flex-wrap gap-2">
-                        {drug.dosageGuidelines.routes.map((route: string) => (
-                          <Badge key={route} variant="secondary">
-                            {route}
-                          </Badge>
-                        ))}
-                        {drug.dosageGuidelines.routes.length === 0 && (
+                        { drug.dosageGuidelines?.routes && JSON.parse( drug.dosageGuidelines.routes).length > 0 ? (
+                        JSON.parse(drug.dosageGuidelines.routes).map((route: string) => (
+                            <Badge key={route} variant="secondary">
+                              {route}
+                            </Badge>
+                          ))
+                        ) : (
                           <p className="text-sm text-muted-foreground">No routes specified</p>
                         )}
                       </div>

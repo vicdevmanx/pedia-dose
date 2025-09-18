@@ -73,129 +73,46 @@ export default function DosageCalculatorPage() {
   const [dosageResult, setDosageResult] = useState<DosageResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Check for URL parameters to pre-populate
+  // Fetch pre-populated patient and drug from URL params
   useEffect(() => {
     const patientId = searchParams.get("patientId")
     const drugId = searchParams.get("drugId")
 
     if (patientId) {
-      const mockPatient = {
-        id: 1,
-        name: "Emma Johnson",
-        age: 8,
-        weight: 25.5,
-        height: 125,
-        gender: "Female",
-        allergies: ["Penicillin", "Peanuts"],
-        conditions: ["Asthma"],
-      }
-      setSelectedPatient(mockPatient)
-      setCurrentStep(2)
+      fetch(`/api/patients?id=${patientId}`).then(res => res.json()).then(data => {
+        setSelectedPatient(data)
+        setCurrentStep(2)
+      });
     }
 
     if (drugId) {
-      const mockDrug = {
-        id: 1,
-        name: "Acetaminophen",
-        genericName: "Acetaminophen",
-        category: "Analgesics",
-        dosageGuidelines: {
-          mgPerKg: "10-15 mg/kg every 4-6 hours",
-          mgPerM2: "Not typically calculated by BSA",
-          maxDaily: "75 mg/kg/day (maximum 4000mg/day)",
-          routes: ["Oral", "Rectal"],
-          frequency: "Every 4-6 hours as needed",
-        },
-        warnings: ["Hepatotoxicity risk with overdose", "Maximum daily dose limits must be observed"],
-        contraindications: ["Severe hepatic impairment"],
-      }
-      setSelectedDrug(mockDrug)
-      if (selectedPatient) setCurrentStep(3)
+      fetch(`/api/drugs?id=${drugId}`).then(res => res.json()).then(data => {
+        setSelectedDrug(data)
+        if (selectedPatient) setCurrentStep(3)
+      });
     }
   }, [searchParams, selectedPatient])
 
-  const calculateBSA = (weight: number, height?: number) => {
-    if (!height) return null
-    return Math.sqrt((height * weight) / 3600)
-  }
-
-  const calculateDosage = () => {
+  const calculateDosage = async () => {
     if (!selectedPatient || !selectedDrug || !selectedRoute) return
 
     setIsCalculating(true)
 
-    setTimeout(() => {
-      const mgPerKgMatch = selectedDrug.dosageGuidelines.mgPerKg.match(/(\d+)-?(\d+)?/)
-      const minDose = mgPerKgMatch ? Number.parseInt(mgPerKgMatch[1]) : 10
-      const maxDose = mgPerKgMatch ? Number.parseInt(mgPerKgMatch[2] || mgPerKgMatch[1]) : 15
+    const response = await fetch('/api/dosage/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patient_id: selectedPatient.id, drug_id: selectedDrug.id, route: selectedRoute }),
+    });
 
-      const avgDosePerKg = (minDose + maxDose) / 2
-      const weightBasedDose = avgDosePerKg * selectedPatient.weight
-
-      let bsaBasedDose: number | undefined
-      if (selectedDrug.dosageGuidelines.mgPerM2 !== "Not typically calculated by BSA" && selectedPatient.height) {
-        const bsa = calculateBSA(selectedPatient.weight, selectedPatient.height)
-        if (bsa) {
-          const mgPerM2Match = selectedDrug.dosageGuidelines.mgPerM2.match(/(\d+)/)
-          const dosePerM2 = mgPerM2Match ? Number.parseInt(mgPerM2Match[1]) : 500
-          bsaBasedDose = dosePerM2 * bsa
-        }
-      }
-
-      const maxDailyMatch = selectedDrug.dosageGuidelines.maxDaily.match(/(\d+)/)
-      const maxDailyPerKg = maxDailyMatch ? Number.parseInt(maxDailyMatch[1]) : 75
-      const maxDaily = maxDailyPerKg * selectedPatient.weight
-
-      const recommendedDose = Math.round(weightBasedDose * 10) / 10
-
-      const warnings: string[] = []
-      let safetyLevel: "safe" | "caution" | "danger" = "safe"
-
-      const hasRelevantAllergy = selectedPatient.allergies.some((allergy) => {
-        if (allergy === "Penicillin" && selectedDrug.name.toLowerCase().includes("amoxicillin")) return true
-        if (allergy === "NSAIDs" && selectedDrug.category === "NSAIDs") return true
-        return false
-      })
-
-      if (hasRelevantAllergy) {
-        warnings.push(`Patient has documented allergy: ${selectedPatient.allergies.join(", ")}`)
-        safetyLevel = "danger"
-      }
-
-      if (recommendedDose > maxDaily) {
-        warnings.push("Calculated dose exceeds maximum daily limit")
-        safetyLevel = "danger"
-      } else if (recommendedDose > maxDaily * 0.8) {
-        warnings.push("Dose approaching maximum daily limit - monitor closely")
-        safetyLevel = "caution"
-      }
-
-      if (selectedPatient.age < 2 && selectedDrug.category === "NSAIDs") {
-        warnings.push("NSAIDs not recommended for children under 2 years")
-        safetyLevel = "danger"
-      }
-
-      warnings.push(...selectedDrug.warnings)
-
-      if (warnings.length > 0 && safetyLevel === "safe") {
-        safetyLevel = "caution"
-      }
-
-      const result: DosageResult = {
-        weightBased: Math.round(weightBasedDose * 10) / 10,
-        bsaBased: bsaBasedDose ? Math.round(bsaBasedDose * 10) / 10 : undefined,
-        maxDaily: Math.round(maxDaily * 10) / 10,
-        recommendedDose,
-        route: selectedRoute,
-        frequency: selectedDrug.dosageGuidelines.frequency,
-        warnings,
-        safetyLevel,
-      }
-
+    if (response.ok) {
+      const result = await response.json();
       setDosageResult(result)
       setCurrentStep(4)
-      setIsCalculating(false)
-    }, 1500)
+    } else {
+      alert('Calculation failed');
+    }
+
+    setIsCalculating(false)
   }
 
   const resetCalculator = () => {
@@ -206,16 +123,31 @@ export default function DosageCalculatorPage() {
     setDosageResult(null)
   }
 
-  const generatePrescription = () => {
+  const generatePrescription = async () => {
     if (!selectedPatient || !selectedDrug || !dosageResult) return
 
-    console.log("Generating prescription:", {
-      patient: selectedPatient,
-      drug: selectedDrug,
-      dosage: dosageResult,
-    })
+    const user = JSON.parse(localStorage.getItem("user") || '{}');
 
-    alert("Prescription generated successfully!")
+    const response = await fetch('/api/prescriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patient_id: selectedPatient.id,
+        drug_id: selectedDrug.id,
+        dosage: dosageResult.recommendedDose + ' mg',
+        quantity: '30',  // Example; make dynamic if needed
+        route: dosageResult.route,
+        frequency: dosageResult.frequency,
+        notes: 'Generated from dosage calculator',
+        doctor_id: user.id,  // From localStorage
+      }),
+    });
+
+    if (response.ok) {
+      alert("Prescription generated successfully!")
+    } else {
+      alert("Prescription generation failed")
+    }
   }
 
   const getStepStatus = (step: number) => {
@@ -460,7 +392,7 @@ export default function DosageCalculatorPage() {
                       <SelectValue placeholder="Select route" />
                     </SelectTrigger>
                     <SelectContent>
-                      {selectedDrug?.dosageGuidelines?.routes?.map((route) => (
+                      {JSON.parse(selectedDrug?.dosageGuidelines?.routes)?.map((route) => (
                         <SelectItem key={route} value={route}>
                           {route}
                         </SelectItem>
